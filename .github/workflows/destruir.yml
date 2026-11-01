@@ -13,6 +13,8 @@ permissions:
   contents: read
   id-token: write
 
+concurrency: terraform-dev
+
 jobs:
   destroy:
     if: ${{inputs.confirmar == 'destruir'}}
