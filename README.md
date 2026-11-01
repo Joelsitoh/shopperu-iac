@@ -1,4 +1,4 @@
-# ShopPeru - Infraestructura como Código
+# ShopPeru 
 
 Proyecto del Grupo 15 del curso Infraestructura como Código.
 
