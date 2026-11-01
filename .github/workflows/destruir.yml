@@ -1,0 +1,33 @@
+name: Destruir Terraform
+
+run-name: ${{github.actor}} esta eliminando ShopPeru de dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmar:
+        description: Escribe destruir para eliminar el entorno dev
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  destroy:
+    if: ${{inputs.confirmar == 'destruir'}}
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Credenciales AWS con OIDC
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{vars.AWS_ROLE_ARN}}
+          aws-region: ${{vars.AWS_REGION}}
+      - uses: hashicorp/setup-terraform@v3
+      - name: Init
+        run: terraform -chdir=terraform init -backend-config="bucket=${{vars.TF_STATE_BUCKET}}" -backend-config="region=${{vars.AWS_REGION}}"
+      - name: Destroy
+        run: terraform -chdir=terraform destroy -auto-approve -var="aws_region=${{vars.AWS_REGION}}"

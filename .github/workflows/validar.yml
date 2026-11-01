@@ -1,0 +1,24 @@
+name: Validar Terraform
+
+on:
+  push:
+    branches: [development]
+  pull_request:
+    branches: [development]
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+      - name: Formato
+        run: terraform -chdir=terraform fmt -check
+      - name: Init sin backend
+        run: terraform -chdir=terraform init -backend=false
+      - name: Validate
+        run: terraform -chdir=terraform validate

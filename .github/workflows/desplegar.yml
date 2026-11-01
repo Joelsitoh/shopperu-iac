@@ -1,0 +1,36 @@
+name: Desplegar Terraform
+
+run-name: ${{github.actor}} esta desplegando ShopPeru en dev
+
+on:
+  workflow_run:
+    workflows: [Validar Terraform]
+    types: [completed]
+    branches: [development]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  apply:
+    if: ${{github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'}}
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{github.event.workflow_run.head_sha}}
+      - name: Credenciales AWS con OIDC
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{vars.AWS_ROLE_ARN}}
+          aws-region: ${{vars.AWS_REGION}}
+      - uses: hashicorp/setup-terraform@v3
+      - name: Init
+        run: terraform -chdir=terraform init -backend-config="bucket=${{vars.TF_STATE_BUCKET}}" -backend-config="region=${{vars.AWS_REGION}}"
+      - name: Plan
+        run: terraform -chdir=terraform plan -var="aws_region=${{vars.AWS_REGION}}" -out=tfplan
+      - name: Apply
+        run: terraform -chdir=terraform apply -auto-approve tfplan
