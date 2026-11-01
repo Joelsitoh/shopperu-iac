@@ -1,6 +1,6 @@
 # ShopPeru - Infraestructura como Código
 
-Proyecto del Grupo 15 del curso Infraestructura como Código (UPAO 2026-II).
+Proyecto del Grupo 15 del curso Infraestructura como Código.
 
 Este repositorio despliega en AWS (us-east-2, entorno `dev`) una parte de la arquitectura de ShopPeru con Terraform:
 
