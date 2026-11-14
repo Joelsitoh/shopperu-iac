@@ -235,11 +235,22 @@ resource "aws_apigatewayv2_route" "respaldo" {
   authorizer_id      = aws_apigatewayv2_authorizer.respaldo.id
 }
 
+resource "aws_cloudwatch_log_group" "api_accesos_respaldo" {
+  provider          = aws.respaldo
+  name              = "/aws/apigateway/${local.nombre}-accesos-respaldo"
+  retention_in_days = 90
+}
+
 resource "aws_apigatewayv2_stage" "respaldo" {
   provider    = aws.respaldo
   api_id      = aws_apigatewayv2_api.respaldo.id
   name        = var.entorno
   auto_deploy = true
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_accesos_respaldo.arn
+    format          = jsonencode({ requestId = "$context.requestId", ruta = "$context.routeKey", estado = "$context.status", ip = "$context.identity.sourceIp", latencia = "$context.responseLatency" })
+  }
 }
 
 resource "aws_lambda_permission" "respaldo" {

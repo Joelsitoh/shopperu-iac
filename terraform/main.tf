@@ -121,10 +121,21 @@ resource "aws_apigatewayv2_route" "productos" {
   authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
 }
 
+resource "aws_cloudwatch_log_group" "api_accesos" {
+  name              = "/aws/apigateway/${local.nombre}-accesos"
+  retention_in_days = 90
+}
+
 resource "aws_apigatewayv2_stage" "dev" {
   api_id      = aws_apigatewayv2_api.api.id
   name        = var.entorno
   auto_deploy = true
+
+  # Registro de cada peticion para revisar errores y tiempos
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_accesos.arn
+    format          = jsonencode({ requestId = "$context.requestId", ruta = "$context.routeKey", estado = "$context.status", ip = "$context.identity.sourceIp", latencia = "$context.responseLatency" })
+  }
 }
 
 resource "aws_lambda_permission" "api" {
