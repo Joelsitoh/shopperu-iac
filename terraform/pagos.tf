@@ -152,6 +152,7 @@ resource "aws_iam_role_policy" "pagos" {
 }
 
 resource "aws_lambda_function" "pagos" {
+  reserved_concurrent_executions = 100
   tracing_config {
     mode = "Active"
   }
