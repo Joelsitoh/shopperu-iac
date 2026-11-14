@@ -78,6 +78,7 @@ data "archive_file" "catalogo" {
 }
 
 resource "aws_lambda_function" "catalogo" {
+  #checkov:skip=CKV_AWS_272:El codigo solo se despliega desde GitHub Actions con OIDC y revision en el entorno dev
   reserved_concurrent_executions = 200
   #checkov:skip=CKV_AWS_117:Solo la Lambda de pagos va en la VPC; las demas usan servicios de AWS con IAM y no salen a internet
   tracing_config {

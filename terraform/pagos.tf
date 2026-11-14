@@ -152,6 +152,7 @@ resource "aws_iam_role_policy" "pagos" {
 }
 
 resource "aws_lambda_function" "pagos" {
+  #checkov:skip=CKV_AWS_272:El codigo solo se despliega desde GitHub Actions con OIDC y revision en el entorno dev
   reserved_concurrent_executions = 100
   tracing_config {
     mode = "Active"
