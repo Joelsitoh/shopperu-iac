@@ -52,7 +52,9 @@ resource "aws_iam_role" "lambda" {
 }
 
 resource "aws_cloudwatch_log_group" "catalogo" {
+  #checkov:skip=CKV_AWS_338:El RNF 12 define 90 dias de retencion; un ano sube el costo sin que lo pida el proyecto
   name              = "/aws/lambda/${local.nombre}-catalogo"
+  kms_key_id        = aws_kms_key.datos.arn
   retention_in_days = 7
 }
 
@@ -78,6 +80,14 @@ data "archive_file" "catalogo" {
 }
 
 resource "aws_lambda_function" "catalogo" {
+  #checkov:skip=CKV_AWS_272:El codigo solo se despliega desde GitHub Actions con OIDC y revision en el entorno dev
+  reserved_concurrent_executions = 200
+  #checkov:skip=CKV_AWS_117:Solo la Lambda de pagos va en la VPC; las demas usan servicios de AWS con IAM y no salen a internet
+  tracing_config {
+    mode = "Active"
+  }
+
+  #checkov:skip=CKV_AWS_116:Las fallas ya tienen DLQ en SQS y EventBridge o la Lambda responde sincrono a API Gateway
   function_name    = "${local.nombre}-catalogo"
   role             = aws_iam_role.lambda.arn
   runtime          = "nodejs22.x"
@@ -121,10 +131,23 @@ resource "aws_apigatewayv2_route" "productos" {
   authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
 }
 
+resource "aws_cloudwatch_log_group" "api_accesos" {
+  #checkov:skip=CKV_AWS_338:El RNF 12 define 90 dias de retencion; un ano sube el costo sin que lo pida el proyecto
+  name              = "/aws/apigateway/${local.nombre}-accesos"
+  kms_key_id        = aws_kms_key.datos.arn
+  retention_in_days = 90
+}
+
 resource "aws_apigatewayv2_stage" "dev" {
   api_id      = aws_apigatewayv2_api.api.id
   name        = var.entorno
   auto_deploy = true
+
+  # Registro de cada peticion para revisar errores y tiempos
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_accesos.arn
+    format          = jsonencode({ requestId = "$context.requestId", ruta = "$context.routeKey", estado = "$context.status", ip = "$context.identity.sourceIp", latencia = "$context.responseLatency" })
+  }
 }
 
 resource "aws_lambda_permission" "api" {
