@@ -290,6 +290,7 @@ resource "aws_iam_role_policy" "enviar_correo" {
 }
 
 resource "aws_lambda_function" "enviar_correo" {
+  #checkov:skip=CKV_AWS_117:Solo la Lambda de pagos va en la VPC; las demas usan servicios de AWS con IAM y no salen a internet
   tracing_config {
     mode = "Active"
   }

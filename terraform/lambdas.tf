@@ -77,6 +77,7 @@ resource "aws_iam_role_policy" "pedidos_sfn" {
 }
 
 resource "aws_lambda_function" "api" {
+  #checkov:skip=CKV_AWS_117:Solo la Lambda de pagos va en la VPC; las demas usan servicios de AWS con IAM y no salen a internet
   tracing_config {
     mode = "Active"
   }
