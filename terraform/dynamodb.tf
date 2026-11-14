@@ -1,7 +1,57 @@
 # KMS: cifra DynamoDB, S3, la clave de la pasarela y los respaldos
+data "aws_caller_identity" "cuenta" {}
+
 resource "aws_kms_key" "datos" {
   description             = "Cifrado de datos de ShopPeru"
   deletion_window_in_days = 7
+
+  # La cuenta administra la llave y CloudWatch Logs puede usarla para cifrar los registros
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "Cuenta"
+        Effect    = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.cuenta.account_id}:root" }
+        Action    = "kms:*"
+        Resource  = "*"
+      },
+      {
+        Sid       = "CloudWatchLogs"
+        Effect    = "Allow"
+        Principal = { Service = "logs.${var.aws_region}.amazonaws.com" }
+        Action    = ["kms:Encrypt", "kms:Decrypt", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:Describe*"]
+        Resource  = "*"
+      }
+    ]
+  })
+}
+
+# Llave de la region de respaldo para los registros de la API en espera
+resource "aws_kms_key" "logs_respaldo" {
+  provider                = aws.respaldo
+  description             = "Cifrado de registros en la region de respaldo"
+  deletion_window_in_days = 7
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "Cuenta"
+        Effect    = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.cuenta.account_id}:root" }
+        Action    = "kms:*"
+        Resource  = "*"
+      },
+      {
+        Sid       = "CloudWatchLogs"
+        Effect    = "Allow"
+        Principal = { Service = "logs.${var.region_respaldo}.amazonaws.com" }
+        Action    = ["kms:Encrypt", "kms:Decrypt", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:Describe*"]
+        Resource  = "*"
+      }
+    ]
+  })
 }
 
 resource "aws_kms_alias" "datos" {

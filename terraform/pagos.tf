@@ -117,6 +117,7 @@ resource "aws_iam_role" "pagos" {
 
 resource "aws_cloudwatch_log_group" "pagos" {
   name              = "/aws/lambda/${local.nombre}-pagos"
+  kms_key_id        = aws_kms_key.datos.arn
   retention_in_days = 90
 }
 

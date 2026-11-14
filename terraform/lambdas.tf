@@ -31,6 +31,7 @@ resource "aws_iam_role" "api" {
 resource "aws_cloudwatch_log_group" "api" {
   for_each          = local.lambdas_api
   name              = "/aws/lambda/${local.nombre}-${each.key}"
+  kms_key_id        = aws_kms_key.datos.arn
   retention_in_days = 90
 }
 

@@ -161,6 +161,7 @@ resource "aws_iam_role" "consulta" {
 resource "aws_cloudwatch_log_group" "consulta" {
   provider          = aws.respaldo
   name              = "/aws/lambda/${local.nombre}-consulta-respaldo"
+  kms_key_id        = aws_kms_key.logs_respaldo.arn
   retention_in_days = 90
 }
 
@@ -246,6 +247,7 @@ resource "aws_apigatewayv2_route" "respaldo" {
 resource "aws_cloudwatch_log_group" "api_accesos_respaldo" {
   provider          = aws.respaldo
   name              = "/aws/apigateway/${local.nombre}-accesos-respaldo"
+  kms_key_id        = aws_kms_key.logs_respaldo.arn
   retention_in_days = 90
 }
 

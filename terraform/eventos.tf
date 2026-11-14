@@ -250,6 +250,7 @@ resource "aws_iam_role" "enviar_correo" {
 
 resource "aws_cloudwatch_log_group" "enviar_correo" {
   name              = "/aws/lambda/${local.nombre}-enviar-correo"
+  kms_key_id        = aws_kms_key.datos.arn
   retention_in_days = 90
 }
 
