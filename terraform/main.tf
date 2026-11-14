@@ -78,6 +78,7 @@ data "archive_file" "catalogo" {
 }
 
 resource "aws_lambda_function" "catalogo" {
+  #checkov:skip=CKV_AWS_116:Las fallas ya tienen DLQ en SQS y EventBridge o la Lambda responde sincrono a API Gateway
   function_name    = "${local.nombre}-catalogo"
   role             = aws_iam_role.lambda.arn
   runtime          = "nodejs22.x"

@@ -77,6 +77,7 @@ resource "aws_iam_role_policy" "pedidos_sfn" {
 }
 
 resource "aws_lambda_function" "api" {
+  #checkov:skip=CKV_AWS_116:Las fallas ya tienen DLQ en SQS y EventBridge o la Lambda responde sincrono a API Gateway
   for_each         = local.lambdas_api
   function_name    = "${local.nombre}-${each.key}"
   role             = aws_iam_role.api[each.key].arn

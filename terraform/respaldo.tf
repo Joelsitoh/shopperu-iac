@@ -187,6 +187,7 @@ resource "aws_iam_role_policy" "consulta" {
 }
 
 resource "aws_lambda_function" "consulta" {
+  #checkov:skip=CKV_AWS_116:Las fallas ya tienen DLQ en SQS y EventBridge o la Lambda responde sincrono a API Gateway
   provider         = aws.respaldo
   function_name    = "${local.nombre}-consulta-respaldo"
   role             = aws_iam_role.consulta.arn

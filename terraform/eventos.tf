@@ -290,6 +290,7 @@ resource "aws_iam_role_policy" "enviar_correo" {
 }
 
 resource "aws_lambda_function" "enviar_correo" {
+  #checkov:skip=CKV_AWS_116:Las fallas ya tienen DLQ en SQS y EventBridge o la Lambda responde sincrono a API Gateway
   function_name    = "${local.nombre}-enviar-correo"
   role             = aws_iam_role.enviar_correo.arn
   runtime          = "nodejs22.x"
