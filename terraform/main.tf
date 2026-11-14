@@ -52,6 +52,7 @@ resource "aws_iam_role" "lambda" {
 }
 
 resource "aws_cloudwatch_log_group" "catalogo" {
+  #checkov:skip=CKV_AWS_338:El RNF 12 define 90 dias de retencion; un ano sube el costo sin que lo pida el proyecto
   name              = "/aws/lambda/${local.nombre}-catalogo"
   kms_key_id        = aws_kms_key.datos.arn
   retention_in_days = 7
@@ -131,6 +132,7 @@ resource "aws_apigatewayv2_route" "productos" {
 }
 
 resource "aws_cloudwatch_log_group" "api_accesos" {
+  #checkov:skip=CKV_AWS_338:El RNF 12 define 90 dias de retencion; un ano sube el costo sin que lo pida el proyecto
   name              = "/aws/apigateway/${local.nombre}-accesos"
   kms_key_id        = aws_kms_key.datos.arn
   retention_in_days = 90

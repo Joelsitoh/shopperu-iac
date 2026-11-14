@@ -29,6 +29,7 @@ resource "aws_iam_role" "api" {
 }
 
 resource "aws_cloudwatch_log_group" "api" {
+  #checkov:skip=CKV_AWS_338:El RNF 12 define 90 dias de retencion; un ano sube el costo sin que lo pida el proyecto
   for_each          = local.lambdas_api
   name              = "/aws/lambda/${local.nombre}-${each.key}"
   kms_key_id        = aws_kms_key.datos.arn
