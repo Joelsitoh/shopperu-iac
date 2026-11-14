@@ -187,6 +187,10 @@ resource "aws_iam_role_policy" "consulta" {
 }
 
 resource "aws_lambda_function" "consulta" {
+  tracing_config {
+    mode = "Active"
+  }
+
   #checkov:skip=CKV_AWS_116:Las fallas ya tienen DLQ en SQS y EventBridge o la Lambda responde sincrono a API Gateway
   provider         = aws.respaldo
   function_name    = "${local.nombre}-consulta-respaldo"
@@ -261,4 +265,10 @@ resource "aws_lambda_permission" "respaldo" {
   function_name = aws_lambda_function.consulta.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.respaldo.execution_arn}/*/*"
+}
+
+resource "aws_iam_role_policy_attachment" "xray_consulta" {
+  provider   = aws.respaldo
+  role       = aws_iam_role.consulta.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
 }

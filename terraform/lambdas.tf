@@ -77,6 +77,10 @@ resource "aws_iam_role_policy" "pedidos_sfn" {
 }
 
 resource "aws_lambda_function" "api" {
+  tracing_config {
+    mode = "Active"
+  }
+
   #checkov:skip=CKV_AWS_116:Las fallas ya tienen DLQ en SQS y EventBridge o la Lambda responde sincrono a API Gateway
   for_each         = local.lambdas_api
   function_name    = "${local.nombre}-${each.key}"
@@ -160,4 +164,17 @@ resource "aws_lambda_permission" "rutas" {
   function_name = aws_lambda_function.api[each.key].function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/*"
+}
+
+# Permiso para enviar trazas a X-Ray
+resource "aws_iam_role_policy_attachment" "xray" {
+  for_each = {
+    catalogo      = aws_iam_role.lambda.name
+    carrito       = aws_iam_role.api["carrito"].name
+    pedidos       = aws_iam_role.api["pedidos"].name
+    pagos         = aws_iam_role.pagos.name
+    enviar-correo = aws_iam_role.enviar_correo.name
+  }
+  role       = each.value
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
 }

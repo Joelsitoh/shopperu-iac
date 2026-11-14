@@ -152,6 +152,10 @@ resource "aws_iam_role_policy" "pagos" {
 }
 
 resource "aws_lambda_function" "pagos" {
+  tracing_config {
+    mode = "Active"
+  }
+
   #checkov:skip=CKV_AWS_116:Las fallas ya tienen DLQ en SQS y EventBridge o la Lambda responde sincrono a API Gateway
   function_name    = "${local.nombre}-pagos"
   role             = aws_iam_role.pagos.arn
